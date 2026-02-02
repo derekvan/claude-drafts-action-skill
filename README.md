@@ -10,6 +10,7 @@ This skill provides Claude with expert knowledge about Drafts actions, including
 - Understanding all 37+ action step types (System, Service, Utility, and Advanced)
 - Working with Drafts' template system and custom template tags
 - JavaScript scripting with the complete Drafts API
+- AppleScript automation (macOS)
 - API integrations and HTTP requests
 - Best practices for action organization and workflow design
 
@@ -72,9 +73,13 @@ Complete API documentation for:
 claude-drafts-action-skill/
 ├── skill/                                # Symlinked to ~/.claude/skills/drafts-actions/
 │   ├── SKILL.md                          # Main skill documentation
+│   ├── CHANGELOG.md                      # Update history
 │   └── references/
 │       ├── action-steps-reference.md     # Detailed step type reference
-│       └── scripting-api-reference.md    # Complete JavaScript API docs
+│       ├── scripting-api-reference.md    # Complete JavaScript API docs
+│       ├── template-tags-reference.md    # Template tag syntax reference
+│       ├── htmlpreview-forms-reference.md # HTMLPreview guide
+│       └── applescript-reference.md      # AppleScript integration (macOS)
 ├── README.md                             # This file
 └── CLAUDE.md                             # Development workflow instructions
 ```
@@ -147,6 +152,28 @@ Complete JavaScript API reference covering:
 - Service integration examples
 - Common code patterns
 - Error handling best practices
+
+### `references/template-tags-reference.md`
+Complete template tag syntax reference covering:
+- All built-in tags (identifier, content, location, date/time)
+- Formatting options (strftime, DateFormatter)
+- Date adjustment and modifiers
+- Special markup and escaping
+
+### `references/htmlpreview-forms-reference.md`
+Comprehensive HTMLPreview guide covering:
+- Working pattern for context.previewValues
+- Form data collection
+- Sequential prompts and dark mode CSS
+- Common mistakes to avoid
+
+### `references/applescript-reference.md`
+Complete AppleScript integration reference (macOS only):
+- Running AppleScript from Drafts actions
+- Using AppleScript object in JavaScript
+- Controlling Drafts from external AppleScript
+- Draft record properties and folder constants
+- Workflow examples and best practices
 
 ## Requirements
 

@@ -150,7 +150,12 @@ Scripting and advanced automation:
 
 3. **Run Shortcut**: Execute Apple Shortcuts with optional response waiting
 
-4. **Run AppleScript**: macOS-only AppleScript execution
+4. **Run AppleScript**: Execute AppleScript code with access to draft properties (macOS only)
+   - Define `execute(draft)` subroutine that receives draft record
+   - Access draft properties: uuid, content, title, tags, flagged, folderName, etc.
+   - Return values accessible via `context.appleScriptResponses` in subsequent steps
+   - Use `AppleScript` object in JavaScript for advanced control
+   - Control Drafts from external AppleScript (create, query, update drafts, run actions)
 
 5. **HTML Preview**: Display interactive HTML with forms that send data back to actions
 
@@ -765,6 +770,96 @@ for (let d of drafts) {
 app.displayInfoMessage(`Processed ${drafts.length} drafts`);
 ```
 
+### AppleScript Integration (macOS)
+
+Drafts supports bidirectional AppleScript integration on Mac.
+
+#### From Drafts: Run AppleScript Action Step
+
+Execute AppleScript with access to current draft properties:
+
+```applescript
+on execute(draft)
+    -- Access draft properties
+    set draftTitle to title of draft
+    set draftContent to content of draft
+
+    -- Your AppleScript logic
+    tell application "Safari"
+        activate
+    end tell
+
+    -- Return value (accessible in JavaScript via context.appleScriptResponses)
+    return "Script completed"
+end execute
+```
+
+Draft properties available in AppleScript:
+- uuid, content, title (readonly)
+- tags (list), flagged (boolean), folderName
+- languageGrammar, permalink
+- createdAt, modifiedAt (dates)
+- createdLatitude, createdLongitude, modifiedLatitude, modifiedLongitude
+
+#### From JavaScript: AppleScript Object
+
+Use the AppleScript object for more control:
+
+```javascript
+let script = `on processText(inputText)
+    set uppercaseText to do shell script "echo " & quoted form of inputText & " | tr '[:lower:]' '[:upper:]'"
+    return uppercaseText
+end processText`;
+
+let runner = AppleScript.create(script);
+if (runner.execute("processText", [draft.content])) {
+    draft.content = runner.lastResult;
+    draft.update();
+    app.displaySuccessMessage("Text transformed");
+} else {
+    context.fail("Error: " + runner.lastError);
+}
+```
+
+#### From External AppleScript: Control Drafts
+
+Control Drafts from external AppleScript scripts:
+
+**Create draft:**
+```applescript
+tell application "Drafts"
+    make new draft with properties {content:"New draft", tags:{"work"}, flagged:true}
+end tell
+```
+
+**Query drafts:**
+```applescript
+tell application "Drafts"
+    set myDrafts to every draft whose tags contains "urgent" and folder is inbox
+end tell
+```
+
+**Update draft:**
+```applescript
+tell application "Drafts"
+    set myDraft to current draft
+    set content of myDraft to "Updated content"
+    set tags of myDraft to {"processed"}
+    set folder of myDraft to archive
+end tell
+```
+
+**Run action:**
+```applescript
+tell application "Drafts"
+    set myAction to action "Copy"
+    set myDraft to current draft
+    perform action myAction on draft myDraft
+end tell
+```
+
+See **references/applescript-reference.md** for comprehensive examples and patterns.
+
 ### API Integration: Claude Translation
 
 Complete working example calling the Claude API to translate draft content:
@@ -865,5 +960,9 @@ Complete reference for Drafts template tag syntax covering all built-in tags (id
 ### references/htmlpreview-forms-reference.md
 
 Comprehensive guide to creating custom HTML-based user interfaces using HTMLPreview. Covers the working pattern for `context.previewValues`, form data collection, sequential prompts, dark mode CSS, button styles, progress bars, escaping user content, and common mistakes to avoid. Load when building custom HTML interfaces that go beyond standard prompts.
+
+### references/applescript-reference.md
+
+Complete reference for AppleScript integration with Drafts (macOS only). Covers running AppleScript from Drafts actions (Run AppleScript step and AppleScript object), controlling Drafts from external AppleScript (creating, querying, updating drafts, workspaces, running actions), draft record properties, folder constants, workflow examples, and best practices. Load when working with AppleScript automation.
 
 Use these references as needed for detailed implementation guidance beyond the core concepts covered in this skill.
